@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addon id="plugin.audio.ipod" version="0.0.2" name="iPod" provider-name="chaos.ct">
+    <requires> </requires>
+    <extension point="xbmc.python.pluginsource" library="iPod.py">
+        <provides>audio</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary>Plugin to browse and play songs of your iPod</summary>
+        <description>Currently, it basically lists your connected iPods, then your albums, and finally the album songs that you can play.</description>
+        <platform>linux</platform>
+    </extension>
+</addon>

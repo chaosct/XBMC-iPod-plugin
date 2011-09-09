@@ -1,0 +1,2 @@
+- Less crashing
+- Playing one track after another
