@@ -95,7 +95,13 @@ def firstLevel():
     listipods = [m for m in sys_utils.get_mounts() if os.path.exists(os.path.join(m,'iPod_Control','iTunes','iTunesDB'))]
     for m in listipods:
         copyInfo(m)
-        MyAddDirectoryItem(make_Url(ListAllAlbums,m),m,isFolder=True)
+        MyAddDirectoryItem(make_Url(menuipod,m),m,isFolder=True)
+    xbmcplugin.endOfDirectory(thisPlugin)
+
+@isUrl('main_menu_ipod')
+def menuipod(m):
+    MyAddDirectoryItem(make_Url(ListAllAlbums,m),"All albums",isFolder=True)
+    MyAddDirectoryItem(make_Url(ListAllSongs,m),"All songs",isFolder=True)
     xbmcplugin.endOfDirectory(thisPlugin)
 
 #queries: albums
@@ -115,6 +121,15 @@ def ViewListAlbums(mp,albumlist):
     xbmcplugin.endOfDirectory(thisPlugin)
 
 #queries: songs
+
+@isUrl('all_songs')
+def ListAllSongs(mp):
+    d = shelve.open(ipodDB)
+    songs = []
+    for a in d[mp].itervalues():
+        songs = songs+a['songs']
+    ViewListSongs(songs)
+    d.close()
 
 @isUrl('songs_from_album')
 def ListAllSongsFromAlbum(mp,album):
