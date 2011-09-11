@@ -1,2 +1,6 @@
+Version 0.0.3 (11 Sept 2011)
+    * Internal refactoring to support more views
+    * Now it can list all songs on the device
+
 Version 0.0.2 (9 Sept 2011)
     * initial release

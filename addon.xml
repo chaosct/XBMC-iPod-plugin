@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.audio.ipod" version="0.0.2" name="iPod" provider-name="chaos.ct">
+<addon id="plugin.audio.ipod" version="0.0.3" name="iPod" provider-name="chaos.ct">
     <requires> </requires>
     <extension point="xbmc.python.pluginsource" library="iPod.py">
         <provides>audio</provides>
