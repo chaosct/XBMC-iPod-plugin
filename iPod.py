@@ -18,12 +18,13 @@ import os.path
 import shelve
 import base64
 
-thisPlugin = int(sys.argv[1])
+thisPlugin = None
 thisPluginUrl='plugin://plugin.audio.ipod/'
 
 ipodDB = os.path.join(BASE_RESOURCE_PATH,'data','ipodDB')
 
 def copyInfo(mp):
+    "Copy all info from iPod Database to a local file"
     import gpod
     albums = dict()
     i_itdb = gpod.itdb_parse(mp,None)
@@ -43,16 +44,21 @@ def copyInfo(mp):
     d[mp]=albums
     d.close()
 
+def MyAddDirectoryItem(url,caption,isFolder=False):
+    "Helper for xbmcplugin.addDirectoryItem()"
+    listItem = xbmcgui.ListItem(caption)
+    xbmcplugin.addDirectoryItem(thisPlugin,url,listItem,isFolder=isFolder)
+
 def firstLevel():
+    "List the founs iPods and copy all the info"
     listipods = [m for m in sys_utils.get_mounts() if os.path.exists(os.path.join(m,'iPod_Control','iTunes','iTunesDB'))]
     for m in listipods:
         copyInfo(m)
         m64 = base64.b64encode(m)
-        listItem = xbmcgui.ListItem(m)
-        xbmcplugin.addDirectoryItem(thisPlugin,thisPluginUrl+m64,listItem,isFolder=True)
+        MyAddDirectoryItem(thisPluginUrl+m64,m,isFolder=True)
     xbmcplugin.endOfDirectory(thisPlugin)
 
-def secondLevel(url):
+def ListAllAlbums(url):
     mp = base64.b64decode(url)
     d = shelve.open(ipodDB)
     albums = d[mp]
@@ -60,35 +66,37 @@ def secondLevel(url):
     for a in sorted(albums):
         if a:
             a64 = base64.b64encode(a)
-            listItem = xbmcgui.ListItem(a)
-            xbmcplugin.addDirectoryItem(thisPlugin,thisPluginUrl+('/'.join((url,a64))),listItem,isFolder=True)
+            MyAddDirectoryItem(thisPluginUrl+('/'.join((url,a64))),a,isFolder=True)
     xbmcplugin.endOfDirectory(thisPlugin)
 
-def thirdLevel(url):
+def ListAllSongsFromAlbum(url):
     mp = base64.b64decode(url[0])
     album = base64.b64decode(url[1])
     d = shelve.open(ipodDB)
     albums = d[mp]
     d.close()
     for s in sorted(albums[album]['songs'],key=lambda s1: s1['track number']):
-        listItem = xbmcgui.ListItem(s['title'])
-        xbmcplugin.addDirectoryItem(thisPlugin,s['file'],listItem)
+        MyAddDirectoryItem(s['file'],s['title'])
     xbmcplugin.endOfDirectory(thisPlugin)
 
-print sys.argv
+def main(a1,a2):
+    global thisPlugin
+    thisPlugin = int(a2)
+    try:
+        url = a1
+        url = url[len(thisPluginUrl):].split('/')
+    except:
+        url = []
 
-try:
-    url = sys.argv[0]
-    url = url[len(thisPluginUrl):].split('/')
-except:
-    url = []
+    url = [u for u in url if u]
 
-url = [u for u in url if u]
+    if len(url) == 0:
+        firstLevel()
+    elif len(url) == 1:
+        ListAllAlbums(url[0])
+    elif len(url) == 2:
+        ListAllSongsFromAlbum(url)
 
-if len(url) == 0:
-    firstLevel()
-elif len(url) == 1:
-    secondLevel(url[0])
-elif len(url) == 2:
-    thirdLevel(url)
+if __name__ == "__main__":
+    main(sys.argv[0],sys.argv[1])
 
